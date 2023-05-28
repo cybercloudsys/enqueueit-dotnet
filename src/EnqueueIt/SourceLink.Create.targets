@@ -1,0 +1,10 @@
+<Project>
+  <PropertyGroup>
+    <SourceLinkGitCommit>{GIT_COMMIT_HASH}</SourceLinkGitCommit>
+    <SourceLinkGitRepository>https://github.com/{OWNER}/{REPO}.git</SourceLinkGitRepository>
+    <SourceLinkEnabled>true</SourceLinkEnabled>
+    <SourceLinkProjectGuid>{GUID}</SourceLinkProjectGuid>
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All"/>
+  </PropertyGroup>
+</Project>
+i'm available 

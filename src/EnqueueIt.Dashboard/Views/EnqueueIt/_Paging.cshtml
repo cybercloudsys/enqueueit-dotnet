@@ -1,0 +1,32 @@
+@using EnqueueIt.Dashboard
+<ul class="pagination float-end">
+@if (Model.TotalPages < 10)
+{
+    @for (int i = 1; i <= Model.TotalPages; i++)
+        @await Html.PartialAsync("_PagingButton", new Paging { RenderPage = i, Data = Model })
+}
+else if (Model.Page < 5)
+{
+    @for (int i = 1; i <= 6; i++)
+        @await Html.PartialAsync("_PagingButton", new Paging { RenderPage = i, Data = Model })
+    <li class="page-item"><a class="page-link">...</a></li>
+    @await Html.PartialAsync("_PagingButton", new Paging { RenderPage = Model.TotalPages, Data = Model })
+}
+else if (Model.Page > (Model.TotalPages - 4))
+{
+    @await Html.PartialAsync("_PagingButton", new Paging { RenderPage = 1, Data = Model })
+    <li class="page-item"><a class="page-link">...</a></li>
+    @for (int i = Model.TotalPages - 5; i <= Model.TotalPages; i++)
+        @await Html.PartialAsync("_PagingButton", new Paging { RenderPage = i, Data = Model })
+}
+else
+{
+    @await Html.PartialAsync("_PagingButton", new Paging { RenderPage = 1, Data = Model })
+    <li class="page-item"><a class="page-link">...</a></li>
+    @for (int i = Model.Page - 2; i <= Model.Page + 2; i++)
+        @await Html.PartialAsync("_PagingButton", new Paging { RenderPage = i, Data = Model })
+    <li class="page-item"><a class="page-link">...</a></li>
+    @await Html.PartialAsync("_PagingButton", new Paging { RenderPage = Model.TotalPages, Data = Model })
+}
+</ul>
+Page @Model.Page of @Model.TotalPages pages

@@ -1,0 +1,41 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <Id>EnqueueIt</Id>
+    <Title>EnqueueIt</Title>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <OutputType>Library</OutputType>
+    <Version>0.3.0</Version>
+    <Authors>Ahmed Abudaqqa</Authors>
+    <Product>EnqueueIt</Product>
+    <Company>Cyber Cloud Systems LLC</Company>
+    <Copyright>Copyright © 2023 Cyber Cloud Systems LLC</Copyright>
+    <PackageProjectUrl>https://www.enqueueit.com</PackageProjectUrl>
+    <Description>
+Easy and scalable solution for manage and execute background tasks seamlessly in .NET applications. It allows you to schedule, queue, and process your jobs and microservices efficiently.
+Designed to support distributed systems, enabling you to scale your background processes across multiple servers. With advanced features like performance monitoring, exception logging, and integration with various storage types, you have complete control and visibility over your workflow.
+Provides a user-friendly web dashboard that allows you to monitor and manage your jobs and microservices from a centralized location. You can easily check the status of your tasks, troubleshoot issues, and optimize performance.
+    </Description>
+    <PackageLicenseExpression>AGPL-3.0-or-later</PackageLicenseExpression>
+    <PackageTags>background;jobs;worker;tasks;schedule;recurring;microservices;delayed;threading;queue;distributed</PackageTags>
+    <PackageIcon>logo.png</PackageIcon>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <SourceLinkGitRepository>https://github.com/cybercloudsys/enqueueit-dotnet.git</SourceLinkGitRepository>
+    <SourceLinkEnabled>true</SourceLinkEnabled>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <DeterministicSourcePaths>true</DeterministicSourcePaths>
+    <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
+    <EnablePackageValidation>true</EnablePackageValidation>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Include="logo.png" Pack="True" PackagePath="\" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="6.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="6.0.0" />
+    <PackageReference Include="Recur" Version="0.3.0" />
+    <PackageReference Include="System.Text.Json" Version="6.0.7" />
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" />
+  </ItemGroup>
+</Project>

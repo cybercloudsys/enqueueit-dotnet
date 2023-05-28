@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="24px" height="24px" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+ <path d="m20.672 2.6921v4.3421" fill="none" stroke="#1fa67a" stroke-linecap="round" stroke-width="3.5"/>
+ <path d="m16.341 6.7259 4.3311 0.30829" fill="none" stroke="#1fa67a" stroke-linecap="round" stroke-width="3.5"/>
+ <title>Sync</title>
+ <path d="m20.738 2.6391v4.3421" fill="none" stroke="#1fa67a" stroke-linecap="round" stroke-width="3.5"/>
+ <path d="m16.407 6.6729 4.3311 0.30829" fill="none" stroke="#1fa67a" stroke-linecap="round" stroke-width="3.5"/>
+ <title>Sync</title>
+ <g fill="none" stroke="#1fa67a" stroke-linecap="round" stroke-width="3.5">
+  <path d="m3.3727 21.347v-4.3421"/>
+  <path d="m7.7038 17.313-4.3311-0.30829"/>
+  <path d="m21.739 14.587a10.025 10.025 0 0 1-8.3751 7.3448 10.025 10.025 0 0 1-9.9907-4.9269"/>
+  <path d="m2.3712 9.3976a10.025 10.025 0 0 1 8.3751-7.3448 10.025 10.025 0 0 1 9.9907 4.9269"/>
+ </g>
+</svg>

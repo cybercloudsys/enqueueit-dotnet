@@ -1,0 +1,7 @@
+@using EnqueueIt.Dashboard
+@model Paging
+<li class="@(Model.RenderPage == Model.Data.Page ? "page-item active" : "page-item")">
+    <a class="page-link" href="@Url.Action(ViewContext.RouteData.Values.Last().Value.ToString(),
+        new { status = Model.Data.Status, page = Model.RenderPage, pageSize = Model.Data.PageSize,
+            jobId = Model.Data.ParentId, search = Model.Data.Search })">@Model.RenderPage</a>  
+</li>

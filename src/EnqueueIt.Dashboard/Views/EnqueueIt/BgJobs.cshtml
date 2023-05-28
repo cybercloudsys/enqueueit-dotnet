@@ -1,0 +1,187 @@
+﻿@using EnqueueIt
+@using EnqueueIt.Dashboard
+@model JobList
+@{
+    ViewData["Title"] = Model.ParentId != null ? $"Jobs of {(Model.Parent?.Name ?? (Model.Parent?.ClassType == null ? Model.Parent?.Name : $"{Model.Parent.ClassType}.{Model.Parent.MethodName}()"))} - {Model.ParentId}" : "Jobs";
+}
+<h4>@ViewData["Title"]</h4>
+<div class="row">
+    <div class="col-sm-3">
+        <nav class="nav flex-column">
+            @foreach (var totalJobs in Model.TotalJobs.Where(tj => tj.Key != "Enqueued"))
+            {
+                <a class='nav-link text-dark @(@totalJobs.Key == Model.Status ? "selected" : "")'
+                    href="./BgJobs?status=@(totalJobs.Key)&jobId=@Model.ParentId&search=@Model.Search">@totalJobs.Key
+                    <span class="float-end @(totalJobs.Value > 0 ? totalJobs.Key : "no-jobs")">@string.Format("{0:n0}", totalJobs.Value)</span>
+                </a>
+            }
+        </nav>
+    </div>
+    <div class="col-sm-9">
+        <h4 class="mb-3">@Model.Status Jobs</h4>
+        <ul class="pagination float-end">
+        @foreach (int i in new int[] { 10, 20, 50, 100, 500 })
+        {
+            <li class="@(i == Model.PageSize ? "page-item active" : "page-item")">
+                <a class="page-link" href="@Url.Action("BgJobs", new { status = Model.Status,
+                    pageSize = i, jobId = Model.ParentId, search = Model.Search })">@i</a>  
+            </li>  
+        }
+        </ul>
+        <div class="p-2 float-end">Jobs per page: </div>
+        @if (Model.Status == JobStatus.Processing.ToString())
+        {
+            <span role="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#stop" onclick="return false">Stop</span>
+        }
+        else
+        {
+            <span role="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#delete" onclick="return false">Delete</span>
+            <button id="xx" class="btn btn-sm btn-outline-primary" onclick="retrySelectedJobs()" onclick="return false">@(Model.Status == JobStatus.Interrupted.ToString() ? "Retry" : "Re-Enqueue")</button>
+            @if ((Model.Status == JobStatus.Processed.ToString() || Model.Status == JobStatus.Failed.ToString())
+                && GlobalConfiguration.Current.LongTermStorage != null)
+            {
+                <div class="search-box input-group">
+                    <input id="search-text" type="text" class="form-control form-control-sm"
+                        placeholder="Search..." value="@Model.Search" onkeypress="searchEnter(event)">
+                    @if (!string.IsNullOrWhiteSpace(Model.Search))
+                    {
+                        <button type="button" class="btn btn-sm bg-transparent" onclick="search('')"
+                            style="margin-left: -25px; z-index: 2;"><span>x</span>
+                        </button>
+                    }
+                    <button id="search-btn" class="btn btn-sm btn-outline-secondary" onclick="search($('#search-text').val())"
+                        data-url='@Url.Action(ViewContext.RouteData.Values.Last().Value.ToString(),
+                            new { status = Model.Status, page = 1, pageSize = Model.PageSize,
+                            jobId = Model.ParentId })'>Search</button>
+                </div>
+            }
+        }
+        <table class="table mt-2">
+            <thead>
+                <tr>
+                    <th style="width: 0;"><input type="checkbox" onchange="selectAll(this.checked)"></th>
+                    <th style="width: 0;"></th>
+                    <th>Job Id</th>
+                    <th>Job</th>
+                    @if (Model.Status == JobStatus.Processing.ToString())
+                    {
+                    <th>Started At</th>
+                    }
+                    else
+                    {
+                    <th>@Model.Status At</th>
+                    }
+                    <th></th>
+                    <th>Server</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var job in Model.Jobs)
+                {
+                    <tr>
+                        <td>@Html.CheckBox("chkJobId", false, new { data_Id = job.Id })</td>
+                        <td class="text-center">
+                            @if ((job.LastActivity ?? job.StartedAt) < DateTime.UtcNow.AddSeconds(-15) && job.Status == JobStatus.Processing)
+                            {
+                                <span title="Inactive" style="color: #d9534f; font-weight: 800;">!</span>
+                            }
+                        </td>
+                        <td>@Html.ActionLink(job.Id.ToString().Substring(0, 8) + "...", "BgJob", new { Id = job.Id })</td>
+                        <td>
+                            @if (job.Error != null)
+                            {
+                                <div class="btn-group me-1">
+                                    <button class="btn btn-outline-danger btn-circle" data-bs-toggle="dropdown" data-bs-auto-close="outside">!</button>
+                                    <ul class="dropdown-menu p-3 text-muted" style="min-width: 300px;">
+                                        <label class="fw-bold text-dark">@job.Error?.Message</label>
+                                        <div>@job.Error?.StackTrace</div>
+                                        @if (job.Error?.InnerError != null)
+                                        {
+                                            <span>Inner Error: </span><label class="fw-bold text-dark mt-1">@job.Error?.InnerError?.Message</label>
+                                            <div>@job.Error?.InnerError?.StackTrace</div>
+                                        }
+                                    </ul>
+                                </div>
+                            }
+                            @(job.Name ?? string.Format("{0}.{1}()", job.ClassType, job.MethodName))
+                        </td>
+                        @if (job.Status == JobStatus.Processing)
+                        {
+                        <td>
+                            @if (job.StartedAt.HasValue)
+                            {
+                                <script>
+                                    document.write(`<span class="dateTime" data-toggle="tooltip" data-placement="top"
+                                        data-time='@job.StartedAt.Value.ToString("yyyy-MM-dd HH:mm:ss")'
+                                        title="${moment.utc('@job.StartedAt').format('ddd DD-MMM-YYYY, HH:mm:ss')}">
+                                        ${moment.utc('@job.StartedAt.Value.ToString("yyyy-MM-dd HH:mm:ss")').fromNow()}
+                                    </span>`);
+                                </script>
+                            }
+                        </td>
+                        }
+                        else
+                        {
+                        <td>
+                            @if (job.CompletedAt.HasValue)
+                            {
+                                <script>
+                                    document.write(`<span class="dateTime" data-toggle="tooltip" data-placement="top"
+                                        data-time='@job.CompletedAt.Value.ToString("yyyy-MM-dd HH:mm:ss")'
+                                        title="${moment.utc('@job.CompletedAt').format('ddd DD-MMM-YYYY, HH:mm:ss')}">
+                                        ${moment.utc('@job.CompletedAt.Value.ToString("yyyy-MM-dd HH:mm:ss")').fromNow()}
+                                    </span>`);
+                                </script>
+                            }
+                        </td>
+                        }
+                        <td>
+                            @job.Duration
+                        </td>
+                        <td>
+                            <span title="@job.ProcessedBy">@job.Server</span>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+        @await Html.PartialAsync("_Paging")
+    </div>
+</div>
+<div class="modal fade" id="stop" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title">Stop Background Jobs</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+            <p>This action will stop all selected background jobs.</p>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <span role="button" class="btn btn-danger" onclick="stopSelectedJobs()">Stop</span>
+        </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="delete" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title">Delete Background Jobs</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+            <p>This action will delete all selected background jobs permanently.</p>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <span role="button" class="btn btn-danger" onclick="deleteSelectedJobs('@Model.Status')">Delete</span>
+        </div>
+        </div>
+    </div>
+</div>
+<script>
+    $(document).ready(() => setLoadTime());
+</script>

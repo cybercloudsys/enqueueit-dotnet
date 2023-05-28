@@ -1,0 +1,94 @@
+﻿@using EnqueueIt
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"]</title>
+    <link rel="icon" type="image/x-icon" href="~/_content/EnqueueIt.Dashboard/icons/favicon.ico" />
+    <link rel="stylesheet" href="~/_content/EnqueueIt.Dashboard/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/_content/EnqueueIt.Dashboard/css/enqueue-it.css" />
+    <script src="~/_content/EnqueueIt.Dashboard/lib/moment/min/moment.min.js"></script>
+    <script src="~/_content/EnqueueIt.Dashboard/lib/moment-duration-format/dist/moment-duration-format.min.js"></script>
+    <script src="~/_content/EnqueueIt.Dashboard/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/_content/EnqueueIt.Dashboard/js/enqueue-it.js" asp-append-version="true"></script>
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+            <div class="container">
+                <a class="navbar-brand" asp-controller="EnqueueIt" asp-action="Index">
+                    <img src="~/_content/EnqueueIt.Dashboard/images/logo.png" style="width: 25px; height: 25px;">
+                    Enqueue It</a>
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                        aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+                    <ul class="navbar-nav flex-grow-1">
+                        <li class="nav-item">
+                            <a class="nav-link text-dark @(Context.Request.Path.Value.Count(c => c == '/') < 2 ? "selected" : "")" asp-controller="EnqueueIt" asp-action="Index">Dashboard</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class='nav-link text-dark @(Context.Request.Path.Value.ToLower().EndsWith("queues") ? "selected" : "")' asp-controller="EnqueueIt" asp-action="Queues">
+                                Queues <span class="text-primary">(@GlobalConfiguration.Current.Storage.GetTotalEnqueuedJobs())</span></a>
+                        </li>
+                        <li class="nav-item">
+                            <a class='nav-link text-dark @(Context.Request.Path.Value.ToLower().EndsWith("bgjobs") ? "selected" : "")' asp-controller="EnqueueIt" asp-action="BgJobs">
+                                Jobs <span class="text-danger">(@(GlobalConfiguration.Current.LongTermStorage != null ? GlobalConfiguration.Current.LongTermStorage.GetTotalFailedJobs() : GlobalConfiguration.Current.Storage.GetTotalFailedJobs()))</span></a>
+                        </li>
+                        <li class="nav-item">
+                            <a class='nav-link text-dark @(Context.Request.Path.Value.ToLower().EndsWith("/jobs") ? "selected" : "")' asp-controller="EnqueueIt" asp-action="Jobs">Scheduled</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class='nav-link text-dark @(Context.Request.Path.Value.ToLower().EndsWith("servers") ? "selected" : "")' asp-controller="EnqueueIt" asp-action="Servers">
+                                Servers <span class="text-success">(@GlobalConfiguration.Current.Storage.GetTotalActiveServers())</span></a>
+                        </li>
+                        @if (GlobalConfiguration.Current.Configuration.EnableDeleteAll)
+                        {
+                            <li class="nav-item">
+                                <span role="button" class="nav-link text-danger" data-bs-toggle="modal" data-bs-target="#deleteAll">Delete All</span>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+    <div class="container">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    </div>
+    <div class="modal fade" id="deleteAll" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Delete All</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>This action will remove all Enqueue It data and you will <span class="text-danger">NOT</span> be able to recover it.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <a class="btn btn-danger" asp-controller="EnqueueIt" asp-action="DeleteAll">Delete All</a>
+            </div>
+            </div>
+        </div>
+    </div>
+    <footer class="border-top footer text-muted">
+        <div class="container">
+            <a href="https://www.enqueueit.com" target="blank" class="text-decoration-none">EnqueueIt
+                v@(AppDomain.CurrentDomain.GetAssemblies().First(a => a.GetName().Name == "EnqueueIt").GetName().Version)</a>
+        </div>
+    </footer>
+    <script src="~/_content/EnqueueIt.Dashboard/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function deleteAll() {
+            return confirm("Do you want to delete all data without being able to recover it later?");
+        }
+    </script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

@@ -1,0 +1,37 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <Id>EnqueueIt.Redis</Id>
+    <Title>EnqueueIt.Redis</Title>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <OutputType>Library</OutputType>
+    <Version>0.3.0</Version>
+    <Authors>Ahmed Abudaqqa</Authors>
+    <Product>EnqueueIt.Redis</Product>
+    <Company>Cyber Cloud Systems LLC</Company>
+    <Copyright>Copyright © 2023 Cyber Cloud Systems LLC.</Copyright>
+    <PackageProjectUrl>https://www.enqueueit.com</PackageProjectUrl>
+    <Description>This is part of EnqueueIt solution to provide support of storing jobs data into redis database for fast processing.</Description>
+    <PackageLicenseExpression>AGPL-3.0-or-later</PackageLicenseExpression>
+    <PackageTags>background;jobs;worker;tasks;schedule;recurring;microservices;delayed;threading;queue;distributed</PackageTags>
+    <PackageIcon>logo.png</PackageIcon>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <SourceLinkGitRepository>https://github.com/cybercloudsys/enqueueit-dotnet.git</SourceLinkGitRepository>
+    <SourceLinkEnabled>true</SourceLinkEnabled>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <DeterministicSourcePaths>true</DeterministicSourcePaths>
+    <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
+    <EnablePackageValidation>true</EnablePackageValidation>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="EnqueueIt" Version="0.3.0" />
+    <PackageReference Include="StackExchange.Redis" Version="2.6.80" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Update="logo.png">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
+</Project>

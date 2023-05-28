@@ -1,0 +1,296 @@
+﻿@using EnqueueIt
+@model BackgroundJob
+@{
+    ViewData["Title"] = Model.Job.Name ?? (Model.Job.JobArgument?.ClassType != null ? string.Format("{0}.{1}()", Model.Job.JobArgument.ClassType.Split(',')[0], Model.Job.JobArgument.MethodName) : Model.Job.AppName);
+}
+<script src="~/_content/EnqueueIt.Dashboard/lib/chart.js/dist/chart.min.js"></script>
+<h4>
+    @ViewData["Title"]
+    <div class="float-end">
+        @if (Model.Status == JobStatus.Enqueued || Model.Status == JobStatus.Processing)
+        {
+            <span role="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#stop">Stop</span>
+        }
+        else
+        {
+            <span role="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#delete">Delete</span>
+            @Html.ActionLink("Retry", "RetryJob", new { id = Model.Id }, new { @class = "btn btn-sm btn-outline-primary" })
+        }
+    </div>
+</h4>
+<div class="row">
+    <div class="col-sm-4">
+        <label class="fw-bold mt-3">Job Id:</label>
+        <div>@Model.Id</div>
+    </div>
+    @if (!string.IsNullOrWhiteSpace(Model.Job.Name))
+    {
+        <div class="col-sm-4">
+            <label class="fw-bold mt-3">Job Name:</label>
+            <div>
+                @GlobalConfiguration.Current.Configuration.Applications?.FirstOrDefault(ap => ap.Name == Model.Job.AppName)?.BaseDirectory
+                @Model.Job.Name
+            </div>
+        </div>
+    }
+</div>
+<div class="row">
+    <div class="col-sm-4">
+        <label class="fw-bold mt-3">App:</label>
+        <div>@Model.Job.AppName</div>
+    </div>
+    <div class="col-sm-4">
+    </div>
+    <div class="col-sm-4">
+    </div>
+</div>
+@if (Model.Job.JobArgument?.ClassType != null)
+{
+    <div class="row">
+        <div class="col-sm-8">
+            <label class="fw-bold mt-3">Assembly:</label>
+            <div>@Model.Job.JobArgument.Assembly</div>
+        </div>
+        <div class="col-sm-4">
+            <label class="fw-bold mt-3">Class:</label>
+            <div>@(Model.Job.JobArgument?.ClassType.Split(',')[0])</div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-4">
+            <label class="fw-bold mt-3">Method:</label>
+            <div>@Model.Job.JobArgument.MethodName</div>
+        </div>
+        <div class="col-sm-8">
+            <label class="fw-bold mt-3">Arguments:</label>
+            <div>
+                @foreach (var arg in Model.Job.JobArgument.Arguments)
+                {
+                    @arg.Name<span>: </span>@if(arg.Type == "System.String") {<span>&quot;</span>}@arg.Value@if(arg.Type == "System.String") {<span>&quot;</span>}
+                    <br>
+                }
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <div class="row">
+        <div class="col-sm-12">
+            <label class="fw-bold mt-3">Argument:</label>
+            <div>@Model.Job.Argument</div>
+        </div>
+    </div>
+}
+<div>
+    <div class="bd-callout @(Model.Status == JobStatus.Processed ? "bd-callout-success" : (Model.Status == JobStatus.Failed ? "bd-callout-danger" : (Model.Status == JobStatus.Processing ? "bd-callout-warning" : "bd-callout-primary")))"">
+        <div>
+            <span class="fw-bold">Status: </span>
+            <span class="fw-bold @(Model.Status == JobStatus.Processed ? "text-success" : (Model.Status == JobStatus.Failed ? "text-danger" : (Model.Status == JobStatus.Processing ? "text-warning" : "text-primary")))">@Model.Status</span>
+            <span class="float-end">
+                @if (((Model.CompletedAt ?? DateTime.UtcNow) - Model.StartedAt)?.TotalSeconds >= 1)
+                {
+                    <script>
+                        document.write(moment.duration('@((Model.CompletedAt ?? DateTime.UtcNow) - Model.StartedAt)',
+                            "milliseconds").format('w [weeks], d [days], h [hrs], m [mins], s [seconds]'));
+                    </script>
+                }
+                else
+                {
+                    <span>&lt; second</span>
+                }
+            </span>
+        </div>
+        @if (@Model.Error != null)
+        {
+            <span>Exception: </span><label class="fw-bold mt-3">@Model.Error?.Message</label>
+            <div class="text-muted">@Model.Error?.StackTrace</div>
+            @if (Model.Error?.InnerError != null)
+            {
+                <span>Inner Exception: </span><label class="fw-bold mt-3">@Model.Error?.InnerError?.Message</label>
+                <div class="text-muted">@Model.Error?.InnerError?.StackTrace</div>
+            }
+        }
+    </div>
+</div>
+<div class="row">
+    <div class="col-sm-4">
+        <label class="fw-bold mt-3">Created At:</label>
+        <div>
+            <script>
+                document.write(`<span class="dateTime" data-toggle="tooltip" data-placement="top"
+                    data-time='@Model.CreatedAt.ToString("yyyy-MM-dd HH:mm:ss")'
+                    title="${moment.utc('@Model.CreatedAt').format('ddd DD-MMM-YYYY, HH:mm:ss')}">
+                    ${moment.utc('@Model.CreatedAt.ToString("yyyy-MM-dd HH:mm:ss")').fromNow()}
+                </span>`);
+            </script>
+        </div>
+    </div>
+    <div class="col-sm-4">
+        <label class="fw-bold mt-3">Started At:</label>
+        <div>
+            @if (Model.StartedAt.HasValue)
+            {
+                <script>
+                    document.write(`<span class="dateTime" data-toggle="tooltip" data-placement="top"
+                        data-time='@Model.StartedAt.Value.ToString("yyyy-MM-dd HH:mm:ss")'
+                        title="${moment.utc('@Model.StartedAt').format('ddd DD-MMM-YYYY, HH:mm:ss')}">
+                        ${moment.utc('@Model.StartedAt.Value.ToString("yyyy-MM-dd HH:mm:ss")').fromNow()}
+                    </span>`);
+                </script>
+            }
+        </div>
+    </div>
+    <div class="col-sm-4">
+        <label class="fw-bold mt-3">Completed At:</label>
+        <div>
+            @if (Model.CompletedAt.HasValue)
+            {
+                <script>
+                    document.write(`<span class="dateTime" data-toggle="tooltip" data-placement="top"
+                        data-time='@Model.CompletedAt.Value.ToString("yyyy-MM-dd HH:mm:ss")'
+                        title="${moment.utc('@Model.CompletedAt').format('ddd DD-MMM-YYYY, HH:mm:ss')}">
+                        ${moment.utc('@Model.CompletedAt.Value.ToString("yyyy-MM-dd HH:mm:ss")').fromNow()}
+                    </span>`);
+                </script>
+            }
+        </div>
+    </div>
+</div>
+<div class="row mb-5">
+    <div class="col-sm-4">
+        <label class="fw-bold mt-3">Queue:</label>
+        <div>
+            @Model.Job.Queue
+        </div>
+    </div>
+    <div class="col-sm-4">
+        <label class="fw-bold mt-3">Server:</label>
+        <div>
+            @Model.Server<br>@Model.ProcessedBy
+        </div>
+    </div>
+    <div class="col-sm-4">
+    </div>
+</div>
+<div>
+    <canvas id="logsChart"></canvas>
+</div>
+<div class="modal fade" id="stop" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title">Stop Background Job</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+            <p>This action will stop the background job.</p>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <a class="btn btn-danger" href="@Url.Action("StopJob", new { id = Model.Id })">Stop</a>
+        </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="delete" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title">Delete Background Job</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+            <p>This action will remove the background job details permanently.</p>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <a class="btn btn-danger" href="@Url.Action("DeleteBackgroundJob", new { id = Model.Id, status = Model.Status })">Delete</a>
+        </div>
+        </div>
+    </div>
+</div>
+<script>
+    const data = {
+        datasets: [{
+            label: 'Memory Usage',
+            data: [],
+            backgroundColor: 'rgba(75, 192, 192, 0.7)',
+            borderColor: 'rgb(75, 192, 192)',
+            yAxisID: 'y'
+        }, {
+            label: 'CPU Usage',
+            data: [],
+            backgroundColor: 'rgba(255, 99, 132, 0.7)',
+            borderColor: 'rgb(255, 99, 132)',
+            yAxisID: 'y1'
+        }]
+    };
+    @foreach (var log in Model.JobLogs)
+    {
+        @:data.datasets[0].data.push({x: '@log.Time.ToString("yyyy-MM-dd HH:mm:ss")', y: @log.MemoryUsage });
+        @:data.datasets[1].data.push({x: '@log.Time.ToString("yyyy-MM-dd HH:mm:ss")', y: @log.CpuUsage });
+    }
+    const config = {
+        id: 'performance',
+        type: 'line',
+        data: data,
+        options: {
+            interaction: {
+                mode: 'index',
+                intersect: false,
+            },
+            elements: {
+                line: {
+                    tension: 0.2
+                },
+                point:{
+                    radius: 0
+                }
+            },
+            scales: {
+                x: {
+                    ticks: {
+                        autoSkip: true,
+                        maxTicksLimit: 10
+                    }
+                },
+                y: {
+                    ticks: {
+                        maxTicksLimit: 10,
+                        callback: function(value, index, values) {
+                            return value + ' MB';
+                        }
+                    }
+                },
+                y1: {
+                    position: 'right',
+                    max: 100,
+                    ticks: {
+                        maxTicksLimit: 10,
+                        callback: function(value, index, values) {
+                            return value + '%';
+                        }
+                    }
+                }
+            },
+            plugins: {
+                tooltip: {
+                    enabled: false,
+                    position: 'nearest',
+                    external: externalTooltipHandler
+                }
+            }
+        }
+    };
+
+    @if (Model.JobLogs.Any())
+    {
+        @:var logsChart = new Chart(
+            @:document.getElementById('logsChart'),
+            @:config
+        @:);
+    }
+
+    $(document).ready(() => setLoadTime());
+</script>

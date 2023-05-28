@@ -1,0 +1,184 @@
+﻿@{
+    ViewData["Title"] = "Enqueue It Page";
+    Layout = "_Layout";
+}
+<script src="~/_content/EnqueueIt.Dashboard/lib/chart.js/dist/chart.min.js"></script>
+<script src="~/_content/EnqueueIt.Dashboard/lib/luxon/build/global/luxon.min.js"></script>
+<script src="~/_content/EnqueueIt.Dashboard/lib/chartjs-adapter-luxon/dist/chartjs-adapter-luxon.min.js"></script>
+<script src="~/_content/EnqueueIt.Dashboard/lib/chartjs-plugin-streaming/dist/chartjs-plugin-streaming.min.js"></script>
+
+<div>
+    <h3>Live</h3>
+    <div style="height: 300px;">
+        <canvas id="live"></canvas>
+    </div>
+    <div class="d-flex my-3">
+        <h3 class="me-2">History</h3>
+        <div class="m-1">
+            <span style="width: 85px" class="btn btn-sm btn-outline-primary active 7days" onclick="loadHistory()">1 week</span>
+        </div>
+        <div class="m-1">
+            <span style="width: 85px" class="btn btn-sm btn-outline-primary 30days" onclick="loadHistory(30)">1 month</span>
+        </div>
+        <div class="m-1">
+            <span style="width: 85px" class="btn btn-sm btn-outline-primary 60days" onclick="loadHistory(60)">3 months</span>
+        </div>
+        <div class="m-1">
+            <span style="width: 85px" class="btn btn-sm btn-outline-primary 120days" onclick="loadHistory(120)">6 months</span>
+        </div>
+    </div>
+    <div style="height: 300px;">
+        <canvas id="history"></canvas>
+    </div>
+</div>
+<script>
+    const config = {
+        type: 'line',
+        data: {
+            labels: [],
+            datasets: [{
+                label: "Succeeded",
+                backgroundColor: "rgba(95,186,88,0.7)",
+                borderColor: "rgb(95,186,88)",
+                data: [],
+            }, {
+            label: "Failed",
+                backgroundColor: "rgba(255,23,23,0.7)",
+                borderColor: "rgb(255,23,23)",
+                data: [],
+            }]
+        },
+        options: {
+            maintainAspectRatio: false,
+            interaction: {
+                intersect: false,
+                mode: 'index',
+            },
+            elements: {
+                line: {
+                    tension: 0.2
+                },
+                point:{
+                    radius: 0
+                }
+            },
+            plugins: {
+                streaming: {
+                    duration: 50000,
+                    refresh: 5000,
+                    onRefresh: function(chart) {
+                        $.ajax({url: 'EnqueueIt/GetJobs', data: { },
+                            xhrFields: { withCredentials: true }}).done(function(result) {
+                            var today = Object.keys(result.data)[0];
+                            if (Object.keys(latest).length > 0) {
+                                var succeeded = 0, failed = 0;
+                                if (latest[today] != null) {
+                                    succeeded = result.data[today].Processed - latest[today].Processed;
+                                    failed = result.data[today].Failed - latest[today].Failed;
+                                }
+                                else {
+                                    succeeded = result.data[today].Processed;
+                                    failed = result.data[today].Failed;
+                                }
+                                latest[today] = result.data[today];
+                                chart.data.labels.push(result.time);
+                                chart.data.datasets[0].data.push(succeeded);
+                                chart.data.datasets[1].data.push(failed);
+                            }
+                            else
+                                latest = result.data;
+                        });
+                    },
+                    delay: 10000
+                },
+                tooltip: {
+                    enabled: false,
+                    position: 'nearest',
+                    external: externalTooltipHandler
+                }
+            },
+            scales: {
+                x: {
+                    type: 'realtime',
+                },
+                y: {
+                    min: 0,
+                    suggestedMax: 10,
+                    ticks: {
+                        maxTicksLimit: 10
+                    }
+                }
+            }
+        }
+    };
+
+    const config1 = {
+        type: 'line',
+        data: {
+            labels: [],
+            datasets: [{
+                label: "Succeeded",
+                backgroundColor: "rgba(95,186,88,0.7)",
+                borderColor: "rgb(95,186,88)",
+                data: [],
+            }, {
+                label: "Failed",
+                backgroundColor: "rgba(255,23,23,0.7)",
+                borderColor: "rgb(255,23,23)",
+                data: [],
+            }]
+        },
+        options: {
+            maintainAspectRatio: false,
+            interaction: {
+                intersect: false,
+                mode: 'index',
+            },
+            elements: {
+                line: {
+                    tension: 0.2
+                },
+                point:{
+                    radius: 0
+                }
+            },
+            scales: {
+                x: {
+                    grid: {
+                        display:false
+                    }   
+                }
+            },
+            plugins: {
+                tooltip: {
+                    enabled: false,
+                    position: 'nearest',
+                    external: externalTooltipHandler
+                }
+            }
+        }
+    };
+
+    var latest = {};
+    new Chart(document.getElementById("live"), config);
+    var historyChart = new Chart(document.getElementById("history"), config1);
+    var days = 7;
+    function loadHistory(days = 7)
+    {
+        $('.btn-sm').removeClass('active');
+        $(`.${days}days`).addClass('active');
+        days = days;
+        $.ajax({url: 'EnqueueIt/GetJobs?days=' + days, data: { }, xhrFields: { withCredentials: true }}).done(function(result) {
+            config1.data.labels = [];
+            config1.data.datasets[0].data = [];
+            config1.data.datasets[1].data = [];
+            for(let date of Object.keys(result.data).sort()) {
+                config1.data.labels.push(date);
+                config1.data.datasets[0].data.push(result.data[date].Processed);
+                config1.data.datasets[1].data.push(result.data[date].Failed);
+            }
+            historyChart.update();
+        });
+    }
+    loadHistory();
+</script>

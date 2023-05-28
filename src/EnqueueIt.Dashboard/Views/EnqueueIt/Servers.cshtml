@@ -1,0 +1,130 @@
+﻿@using EnqueueIt
+@model List<EnqueueIt.Server>
+@{
+    ViewData["Title"] = "Servers";
+}
+<h4>@ViewData["Title"]</h4>
+<table class="table">
+    <thead>
+        <tr>
+            <th style="width: 48px;"></th>
+            <th>Hostname</th>
+            <th>Server Id</th>
+            <th>Started At</th>
+            <th>Last Activity</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var server in Model)
+        {
+            <tr>
+                <td class="text-center">
+                    @if (server.LastActivity > DateTime.UtcNow.AddSeconds(-10-GlobalConfiguration.Current.Configuration.ServerHeartbeatInterval))
+                    {
+                        @if (server.HasDataSync)
+                        {
+                            <img src="~/_content/EnqueueIt.Dashboard/svgs/sync.svg" title="Syncing">
+                        }
+                        else
+                        {
+                            <img src="~/_content/EnqueueIt.Dashboard/svgs/pulse.svg" title="Active">
+                        }
+                    }
+                    else
+                    {
+                        <span title="Inactive" style="color: #d9534f; font-weight: 800;">!</span>
+                    }
+                </td>
+                <td>
+                    @server.Hostname
+                    <table class="table-sm table-borderless w-100 mt-3">
+                        <thead>
+                            <tr>
+                                <th>Total Workers</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>
+                                    @server.WorkersCount
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </td>
+                <td>
+                    @server.Id
+                    <table class="table-sm table-borderless w-100 mt-3">
+                        <thead>
+                            <tr>
+                                <th>Queue</th>
+                                <th>Workers</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var queue in server.Queues)
+                            {
+                                <tr>
+                                    <td>@queue.Name</td>
+                                    <td>@queue.WorkersCount</td>
+                                </tr>                                
+                            }
+                        </tbody>
+                    </table>
+                </td>
+                <script>
+                    document.write(`<td><span class="startedAt" data-toggle="tooltip" data-placement="top"
+                        data-time='@server.StartedAt.ToString("yyyy-MM-dd HH:mm:ss")'
+                        title="${moment.utc('@server.StartedAt').format('ddd DD-MMM-YYYY, HH:mm:ss')}">
+                        ${moment.utc('@server.StartedAt.ToString("yyyy-MM-dd HH:mm:ss")').fromNow()}
+                    </span></td>`);
+                </script> 
+                <script>
+                    document.write(`<td><span data-toggle="tooltip" data-placement="top"
+                        title="${moment.utc('@server.LastActivity').format('ddd DD-MMM-YYYY, HH:mm:ss')}">
+                        ${moment.utc('@server.LastActivity.ToString("yyyy-MM-dd HH:mm:ss")').fromNow()}
+                    </span></td>`);
+                </script>
+                <td>
+                    @if (server.Status == ServerStatus.Running)
+                    {
+                        @if (GlobalConfiguration.Current.Configuration.EnableStopServers)
+                        {
+                            <button class="btn btn-sm btn-outline-danger" data-bs-toggle="modal"
+                                data-bs-target="#stopModal" onclick="stopServer('@server.Id')">Stop</button>
+                        }
+                    }
+                    else
+                    {
+                        <span class="btn btn-sm btn-outline-danger disabled">Stopped</span>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+<div class="modal fade" id="stopModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title">Stop Server</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+            <p><strong>Stop</strong> action will stop the server and stop all the running jobs on the server immediately.</p>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <a id="stop" class="btn btn-danger">Stop</a>
+        </div>
+        </div>
+    </div>
+</div>
+<script>
+    $(document).ready(() => setLoadTime());
+    function stopServer(serverId)
+    {
+        $('#stop').attr('href', '@Url.Action("StopServer", new { id = "serverId" })'.replace('serverId', serverId));
+    }
+</script>

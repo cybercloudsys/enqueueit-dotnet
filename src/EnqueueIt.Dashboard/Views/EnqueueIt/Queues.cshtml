@@ -1,0 +1,95 @@
+﻿@using EnqueueIt
+@using EnqueueIt.Dashboard
+@model JobList
+@{
+    ViewData["Title"] = "Queues";
+}
+<h4>@ViewData["Title"]</h4>
+@if (Model.Status != null)
+{
+<div class="row">
+    <div class="col-sm-3">
+        <nav class="nav flex-column">
+            @foreach(var totalJobs in Model.TotalJobs.Where(tj => tj.Key != "Enqueued"))
+            {
+                <a class='nav-link text-dark @(@totalJobs.Key == Model.Status ? "selected" : "")'
+                    href="./Queues?queue=@totalJobs.Key">@totalJobs.Key
+                    <span class="float-end @(totalJobs.Value > 0 ? "has-jobs" : "no-jobs")">@string.Format("{0:n0}", totalJobs.Value)</span>
+                </a>
+            }
+        </nav>
+    </div>
+    <div class="col-sm-9">
+        <h4 class="mb-3">Jobs enqueued in <span class="text-primary">@Model.Status</span></h4>
+        <ul class="pagination float-end">
+        @foreach (int i in new int[] { 10, 20, 50, 100, 500 })
+        {
+            <li class="@(i == Model.PageSize ? "page-item active" : "page-item")">
+                <a class="page-link" href="@Url.Action("Queues", new { queue = Model.Status, pageSize = i })">@i</a>  
+            </li>  
+        }
+        </ul>
+        <div class="p-2 float-end">Jobs per page: </div>
+        <span role="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#stop">Stop</span>
+        <table class="table mt-2">
+            <thead>
+                <tr>
+                    <th><input type="checkbox" onchange="selectAll(this.checked)"></th>
+                    <th>Job Id</th>
+                    <th>Job</th>
+                    <th>Created At</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var job in Model.Jobs)
+                {
+                    <tr>
+                        <td>@Html.CheckBox("chkJobId", false, new { data_Id = job.Id })</td>
+                        <td>@Html.ActionLink(job.Id.ToString().Substring(0, 8) + "...", "BgJob", new { Id = job.Id })</td>
+                        <td>
+                            @(job.Name ?? string.Format("{0}.{1}()", job.ClassType, job.MethodName))
+                            @if (!string.IsNullOrWhiteSpace(job.Error?.Message))
+                            {
+                                <hr>
+                                <b>@job.Error?.Message</b>
+                                <br>
+                                @job.Error?.StackTrace
+                            }
+                        </td>
+                        <td>
+                            <script>
+                                document.write(`<span class="dateTime" data-toggle="tooltip" data-placement="top"
+                                    data-time='@job.CreatedAt.ToString("yyyy-MM-dd HH:mm:ss")'
+                                    title="${moment.utc('@job.CreatedAt').format('ddd DD-MMM-YYYY, HH:mm:ss')}">
+                                    ${moment.utc('@job.CreatedAt.ToString("yyyy-MM-dd HH:mm:ss")').fromNow()}
+                                </span>`);
+                            </script>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+        @await Html.PartialAsync("_Paging")
+    </div>
+</div>
+}
+<div class="modal fade" id="stop" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title">Stop Background Jobs</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+            <p>This action will stop all selected background jobs.</p>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <span role="button" class="btn btn-danger" onclick="stopSelectedJobs()">Stop</span>
+        </div>
+        </div>
+    </div>
+</div>
+<script>
+    $(document).ready(() => setLoadTime());
+</script>

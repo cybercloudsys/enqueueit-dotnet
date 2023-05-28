@@ -1,0 +1,174 @@
+﻿a.navbar-brand {
+  white-space: normal;
+  text-align: center;
+  word-break: break-all;
+}
+
+/* Provide sufficient contrast against white background */
+a {
+  color: #0366d6;
+}
+
+.btn-primary {
+  color: #fff;
+  background-color: #1b6ec2;
+  border-color: #1861ac;
+}
+
+.nav-pills .nav-link.active, .nav-pills .show > .nav-link {
+  color: #fff;
+  background-color: #1b6ec2;
+  border-color: #1861ac;
+}
+
+/* Sticky footer styles
+-------------------------------------------------- */
+html {
+  font-size: 14px;
+}
+@media (min-width: 768px) {
+  html {
+    font-size: 16px;
+  }
+}
+
+.border-top {
+  border-top: 1px solid #e5e5e5;
+}
+.border-bottom {
+  border-bottom: 1px solid #e5e5e5;
+}
+
+.box-shadow {
+  box-shadow: 0 .25rem .75rem rgba(0, 0, 0, .05);
+}
+
+button.accept-policy {
+  font-size: 1rem;
+  line-height: inherit;
+}
+
+/* Sticky footer styles
+-------------------------------------------------- */
+html {
+  position: relative;
+  min-height: 100%;
+}
+
+body {
+  /* Margin bottom by footer height */
+  margin-bottom: 60px;
+}
+.footer {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  white-space: nowrap;
+  line-height: 60px; /* Vertically center the text there */
+}
+
+.bd-callout {
+  padding: 1.25rem;
+  margin-top: 1.25rem;
+  margin-bottom: 1.25rem;
+  border: 1px solid #eee;
+  border-left-width: 0.25rem;
+  border-radius: 0.25rem;
+}
+.bd-callout-primary {
+  border-left-color: #007bff !important;
+}
+.bd-callout-success {
+  border-left-color: #28a745 !important;
+}
+.bd-callout-danger {
+  border-left-color: #dc3545 !important;
+}
+.bd-callout-warning {
+  border-left-color: #ffc107 !important;
+}
+
+.has-jobs {
+  padding: 0 5px;
+  color: #007bff;
+  border: solid 1px #007bff;
+  border-radius: 10px;
+}
+
+.no-jobs {
+  padding: 0 5px;
+  color: #6c757d;
+  border: solid 1px #6c757d;
+  border-radius: 10px;
+}
+
+.selected {
+  background-color: #f2f4f7;
+  border-radius: 10px;
+}
+
+th {
+  white-space: nowrap;
+}
+
+.Processing {
+  padding: 0 5px;
+  color: orange;
+  border: solid 1px orange;
+  border-radius: 10px;
+}
+.Processed {
+  padding: 0 5px;
+  color: #28a745;
+  border: solid 1px #28a745;
+  border-radius: 10px;
+}
+.Canceled, .Interrupted {
+  padding: 0 5px;
+  color: #007bff;
+  border: solid 1px #007bff;
+  border-radius: 10px;
+}
+.Failed {
+  padding: 0 5px;
+  color: white;
+  background-color: #dc3545;
+  border: solid 1px #dc3545;
+  border-radius: 10px;
+}
+
+.selected {
+  background-color: #f2f4f7;
+  border-radius: 10px;
+}
+
+.no-jobs {
+  padding: 0 5px;
+  color: #6c757d;
+  border: solid 1px #6c757d;
+  border-radius: 10px;
+}
+
+th {
+  white-space: nowrap;
+}
+
+.btn-circle {
+  width: 24px !important;
+  height: 24px !important;
+  text-align: center !important;
+  padding: 6px 0 !important;
+  font-size: 15px !important;
+  font-weight: 700;
+  line-height: 0.7 !important;
+  border-radius: 12px !important;
+}
+
+.search-box {
+  margin-top: 5px;
+  width: unset !important;
+}
+
+.search-box > .form-control {
+  width: unset !important;
+}

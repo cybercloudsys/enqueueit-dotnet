@@ -1,0 +1,155 @@
+﻿@using EnqueueIt
+@model Job
+@{
+    ViewData["Title"] = Model.Name ?? (Model.JobArgument?.ClassType != null ? string.Format("{0}.{1}()", Model.JobArgument.ClassType.Split(',')[0], Model.JobArgument.MethodName) : Model.AppName);
+}
+<script src="~/_content/EnqueueIt.Dashboard/lib/chart.js/dist/chart.min.js"></script>
+<h4>
+    @ViewData["Title"]
+    <div class="float-end">
+        @Html.ActionLink("Delete", "DeleteJob", new { Id = Model.Id },
+            new { @class = "btn btn-sm btn-outline-danger",
+                onclick = "return confirm('Are you sure to delete this job?');" })
+    </div>
+</h4>
+<div class="row">
+    <div class="col-sm-4">
+        <label class="fw-bold mt-3">Job Id:</label>
+        <div>@Model.Id</div>
+    </div>
+    @if (!string.IsNullOrWhiteSpace(Model.Name))
+    {
+        <div class="col-sm-4">
+            <label class="fw-bold mt-3">Job Name:</label>
+            <div>@Model.Name</div>
+        </div>
+    }
+</div>
+@if (Model.JobArgument?.ClassType != null)
+{
+    <div class="row">
+        <div class="col-sm-8">
+            <label class="fw-bold mt-3">Assembly:</label>
+            <div>@Model.JobArgument.Assembly</div>
+        </div>
+        <div class="col-sm-4">
+            <label class="fw-bold mt-3">Class:</label>
+            <div>@(Model.JobArgument.ClassType.Split(',')[0])</div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-4">
+            <label class="fw-bold mt-3">Method:</label>
+            <div>@Model.JobArgument.MethodName</div>
+        </div>
+        <div class="col-sm-8">
+            <label class="fw-bold mt-3">Arguments:</label>
+            <div>
+                @foreach (var arg in Model.JobArgument.Arguments)
+                {
+                    @arg.Name<span>: </span>@if(arg.Type == "System.String") {<span>&quot;</span>}@arg.Value@if(arg.Type == "System.String") {<span>&quot;</span>}
+                    <br>
+                }
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <div class="row">
+        <div class="col-sm-12">
+            <label class="fw-bold mt-3">Argument:</label>
+            <div>@Model.Argument</div>
+        </div>
+    </div>
+}
+<div>
+    <div class="bd-callout bd-callout-primary">
+        <div>
+            <span class="fw-bold">Status: </span>
+            <span class="fw-bold text-primary">Scheduled</span>
+        </div>
+    </div>
+</div>
+<div class="row mb-5">
+    <div class="col-sm-4">
+        <label class="fw-bold mt-3">Created At:</label>
+        <div>
+            <script>
+                document.write(`<span class="dateTime" data-toggle="tooltip" data-placement="top"
+                    data-time='@Model.CreatedAt.ToString("yyyy-MM-dd HH:mm:ss")'
+                    title="${moment.utc('@Model.CreatedAt').format('ddd DD-MMM-YYYY, HH:mm:ss')}">
+                    ${moment.utc('@Model.CreatedAt.ToString("yyyy-MM-dd HH:mm:ss")').fromNow()}
+                </span>`);
+            </script>
+        </div>
+    </div>
+    <div class="col-sm-4">
+        <label class="fw-bold mt-3">Last run:</label>
+        <div>
+            @if (Model.BackgroundJobs.Count > 0)
+            {
+                <div class="fw-bold @(Model.BackgroundJobs[0].Status == JobStatus.Processed ? "text-success" : (Model.BackgroundJobs[0].Status == JobStatus.Failed ? "text-danger" : (Model.BackgroundJobs[0].Status == JobStatus.Processing ? "text-warning" : "text-primary")))">
+                    @Model.BackgroundJobs[0].Status</div>
+                <div>
+                    @if (Model.BackgroundJobs[0].Status == JobStatus.Enqueued)
+                    {
+                        <script>
+                            document.write(`<span class="dateTime" data-toggle="tooltip" data-placement="top"
+                                data-time='@Model.BackgroundJobs[0].CreatedAt.ToString("yyyy-MM-dd HH:mm:ss")'
+                                title="${moment.utc('@Model.BackgroundJobs[0].CreatedAt').format('ddd DD-MMM-YYYY, HH:mm:ss')}">
+                                ${moment.utc('@Model.BackgroundJobs[0].CreatedAt.ToString("yyyy-MM-dd HH:mm:ss")').fromNow()}
+                            </span>`);
+                        </script>
+                    }
+                    else if (@Model.BackgroundJobs[0].StartedAt.HasValue)
+                    {
+                        <script>
+                            document.write(`<span class="dateTime" data-toggle="tooltip" data-placement="top"
+                                data-time='@Model.BackgroundJobs[0].StartedAt.Value.ToString("yyyy-MM-dd HH:mm:ss")'
+                                title="${moment.utc('@Model.BackgroundJobs[0].StartedAt').format('ddd DD-MMM-YYYY, HH:mm:ss')}">
+                                ${moment.utc('@Model.BackgroundJobs[0].StartedAt.Value.ToString("yyyy-MM-dd HH:mm:ss")').fromNow()}
+                            </span>`);
+                        </script>
+                        <span> for </span>
+                        <script>
+                            document.write(moment.duration('@((Model.BackgroundJobs[0].CompletedAt ?? DateTime.UtcNow) - Model.BackgroundJobs[0].StartedAt)', "milliseconds").format('w [weeks], d [days], h [hrs], m [mins], s [seconds]'));
+                        </script>
+                    }
+                </div>
+                <div>
+                    @Html.ActionLink("View all jobs", "BgJobs", new { jobId = Model.Id })
+                </div>
+            }
+            else
+            {
+                <span>Never</span>
+            }
+        </div>
+    </div>
+    <div class="col-sm-4">
+        <label class="fw-bold mt-3">Next run:</label>
+        <div>
+            @if (Model.StartAt.HasValue)
+            {
+                <script>
+                    document.write(`<span class="dateTime" data-toggle="tooltip" data-placement="top"
+                        data-time='@Model.StartAt.Value.ToString("yyyy-MM-dd HH:mm:ss")'
+                        title="${moment.utc('@Model.StartAt').format('ddd DD-MMM-YYYY, HH:mm:ss')}">
+                        ${moment.utc('@Model.StartAt.Value.ToString("yyyy-MM-dd HH:mm:ss")').fromNow()}
+                    </span>`);
+                </script>
+            }
+            else if (!string.IsNullOrWhiteSpace(Model.AfterBackgroundJobIds))
+            {
+                @foreach (var bgJobId in Model.AfterBackgroundJobIds.Split(","))
+                {
+                    <span>After: </span>@Html.ActionLink(bgJobId.Substring(0, 8) + "...", "Job", new { Id = bgJobId })
+                }
+            }
+        </div>
+    </div>
+</div>
+<script>
+    $(document).ready(() => setLoadTime());
+</script>

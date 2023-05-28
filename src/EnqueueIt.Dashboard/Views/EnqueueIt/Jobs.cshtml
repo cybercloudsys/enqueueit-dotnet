@@ -1,0 +1,165 @@
+﻿@using EnqueueIt
+@using EnqueueIt.Dashboard
+@model JobList
+@{
+    ViewData["Title"] = "Scheduled";
+}
+<h4>@ViewData["Title"]</h4>
+@if (Model.Status != null)
+{
+<div class="row">
+    <div class="col-sm-3">
+        <nav class="nav flex-column">
+            @foreach(var totalJobs in Model.TotalJobs)
+            {
+                <a class='nav-link text-dark @(@totalJobs.Key == Model.Status ? "selected" : "")'
+                    href="./Jobs?status=@totalJobs.Key">@totalJobs.Key
+                    <span class="float-end @(totalJobs.Value > 0 ? "has-jobs" : "no-jobs")">@string.Format("{0:n0}", totalJobs.Value)</span>
+                </a>
+            }
+        </nav>
+    </div>
+    <div class="col-sm-9">
+        <h4 class="mb-3">@Model.Status Jobs</h4>
+        <ul class="pagination float-end">
+        @foreach (int i in new int[] { 10, 20, 50, 100, 500 })
+        {
+            <li class="@(i == Model.PageSize ? "page-item active" : "page-item")">
+                <a class="page-link" href="@Url.Action("Jobs", new { status = Model.Status, pageSize = i })">@i</a>  
+            </li>  
+        }
+        </ul>
+        <div class="p-2 float-end">Jobs per page: </div>
+        <button class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#delete">Delete</button>
+        <button class="btn btn-sm btn-outline-primary" onclick="enqueueSelectedJobs()">Enqueue</button>
+        <table class="table mt-2">
+            <thead>
+                <tr>
+                    <th><input type="checkbox" onchange="selectAll(this.checked)"></th>
+                    <th>Job Id</th>
+                    <th>Job</th>
+                    @if (Model.Status == "Recurring")
+                    {
+                        <th>Recurring pattern</th>
+                        <th>Last run</th>
+                        <th>Next run</th>
+                    }
+                    else if (Model.Status == "Scheduled")
+                    {
+                        <th>Start At</th>
+                    }
+                    else
+                    {
+                        <th>Waiting For</th>
+                    }
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var job in Model.Jobs)
+                {
+                    <tr>
+                        <td>@Html.CheckBox("chkJobId", false, new { data_Id = job.Id })</td>
+                        <td>@Html.ActionLink(job.Id.ToString().Substring(0, 8) + "...", "Job", new { Id = job.Id })</td>
+                        <td>@(job.Name ?? string.Format("{0}.{1}()", job.ClassType.Split(',')[0].Split(".").Last(), job.MethodName))</td>
+                        @if (job.IsRecurring)
+                        {
+                            <td>
+                                @(job.RecurringPattern.ToString())
+                            </td>
+                            <td>
+                                @if (job.Status != JobStatus.Scheduled)
+                                {
+                                    <a class="fw-bold @(job.Status == JobStatus.Processed ? "text-success" : (job.Status == JobStatus.Failed ? "text-danger" : (job.Status == JobStatus.Processing ? "text-warning" : "text-primary")))"
+                                        href='@Url.ActionLink("BgJob", values: new { id = job.JobId })'>
+                                        @if (job.Status == JobStatus.Enqueued)
+                                        {
+                                            <script>
+                                                document.write(`<span class="dateTime" data-toggle="tooltip" data-placement="top"
+                                                    data-time='@job.CreatedAt.ToString("yyyy-MM-dd HH:mm:ss")'
+                                                    title="${moment.utc('@job.CreatedAt').format('ddd DD-MMM-YYYY, HH:mm:ss')}">
+                                                    ${moment.utc('@job.CreatedAt.ToString("yyyy-MM-dd HH:mm:ss")').fromNow()}
+                                                </span>`);
+                                            </script>
+                                        }
+                                        else
+                                        {
+                                            <script>
+                                                document.write(`<span class="dateTime" data-toggle="tooltip" data-placement="top"
+                                                    data-time='@job.StartedAt.Value.ToString("yyyy-MM-dd HH:mm:ss")'
+                                                    title="${moment.utc('@job.StartedAt').format('ddd DD-MMM-YYYY, HH:mm:ss')}">
+                                                    ${moment.utc('@job.StartedAt.Value.ToString("yyyy-MM-dd HH:mm:ss")').fromNow()}
+                                                </span>`);
+                                            </script>
+                                        }
+                                    </a>
+                                }
+                                else
+                                {
+                                    <span>Never</span>
+                                }
+                            </td>
+                            <td>
+                                @if (job.StartAt.HasValue)
+                                {
+                                    <script>
+                                        document.write(`<span class="dateTime" data-toggle="tooltip" data-placement="top"
+                                            data-time='@job.StartAt.Value.ToString("yyyy-MM-dd HH:mm:ss")'
+                                            title="${moment.utc('@job.StartAt').format('ddd DD-MMM-YYYY, HH:mm:ss')}">
+                                            ${moment.utc('@job.StartAt.Value.ToString("yyyy-MM-dd HH:mm:ss")').fromNow()}
+                                        </span>`);
+                                    </script>
+                                }
+                            </td>
+                        }
+                        else if (job.StartAt.HasValue)
+                        {
+                            <td>
+                                <script>
+                                    document.write(`<span class="dateTime" data-toggle="tooltip" data-placement="top"
+                                        data-time='@job.StartAt.Value.ToString("yyyy-MM-dd HH:mm:ss")'
+                                        title="${moment.utc('@job.StartAt').format('ddd DD-MMM-YYYY, HH:mm:ss')}">
+                                        ${moment.utc('@job.StartAt.Value.ToString("yyyy-MM-dd HH:mm:ss")').fromNow()}
+                                    </span>`);
+                                </script>
+                            </td>
+                        }
+                        else
+                        {
+                            <td>
+                                @if (job.AfterBackgroundJobIds != null)
+                                {
+                                    @foreach (var bgJobId in job.AfterBackgroundJobIds)
+                                    {
+                                        @Html.ActionLink(bgJobId.Substring(0, 8) + "...", "BgJob", new { Id = bgJobId })
+                                    }
+                                }
+                            </td>
+                        }
+                    </tr>
+                }
+            </tbody>
+        </table>
+        @await Html.PartialAsync("_Paging")
+    </div>
+</div>
+}
+<div class="modal fade" id="delete" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title">Delete Jobs</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+            <p>This action will delete all selected jobs permanently.</p>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <span role="button" class="btn btn-danger" onclick="deleteScheduledJobs()">Delete</span>
+        </div>
+        </div>
+    </div>
+</div>
+<script>
+    $(document).ready(() => setLoadTime());
+</script>
