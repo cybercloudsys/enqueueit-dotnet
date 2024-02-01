@@ -76,13 +76,13 @@
                 <script>
                     document.write(`<td><span class="startedAt" data-toggle="tooltip" data-placement="top"
                         data-time='@server.StartedAt.ToString("yyyy-MM-dd HH:mm:ss")'
-                        title="${moment.utc('@server.StartedAt').format('ddd DD-MMM-YYYY, HH:mm:ss')}">
+                        title="${moment.utc('@server.StartedAt.ToString("yyyy-MM-dd HH:mm:ss")').format('ddd DD-MMM-YYYY, HH:mm:ss')}">
                         ${moment.utc('@server.StartedAt.ToString("yyyy-MM-dd HH:mm:ss")').fromNow()}
                     </span></td>`);
                 </script> 
                 <script>
                     document.write(`<td><span data-toggle="tooltip" data-placement="top"
-                        title="${moment.utc('@server.LastActivity').format('ddd DD-MMM-YYYY, HH:mm:ss')}">
+                        title="${moment.utc('@server.LastActivity.ToString("yyyy-MM-dd HH:mm:ss")').format('ddd DD-MMM-YYYY, HH:mm:ss')}">
                         ${moment.utc('@server.LastActivity.ToString("yyyy-MM-dd HH:mm:ss")').fromNow()}
                     </span></td>`);
                 </script>

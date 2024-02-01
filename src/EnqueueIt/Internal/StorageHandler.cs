@@ -16,6 +16,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
@@ -30,42 +31,56 @@ namespace EnqueueIt.Internal
         {
             this.server = server;
             cts = new CancellationTokenSource();
-            new Thread(() => { CleanStorage(); }).Start();
-            new Thread(() => { DeleteExpiredJobs(); }).Start();
+            Process(CleanStorage, GlobalConfiguration.Current.Configuration.CleanStorageInterval);
+            Process(DeleteExpiredJobs, 3600);
             if (GlobalConfiguration.Current.LongTermStorage != null)
-                new Thread(() => { SyncJobs(); }).Start();
+                Process(SyncJobs, GlobalConfiguration.Current.Configuration.StorageSyncInterval);
+        }
+
+        internal void ForceStop()
+        {
+            cts.Cancel();
+        }
+
+        private void Process(Action action, int seconds)
+        {
+            new Thread(() => {
+                TimeSpan waitTime = TimeSpan.FromSeconds(seconds);
+                while (server.Status == ServerStatus.Running)
+                {
+                    action.Invoke();
+                    try
+                    {
+                        Task.Delay(waitTime, cts.Token).Wait();
+                    } catch { }
+                }
+            }).Start();
         }
 
         private void SyncJobs()
         {
-            TimeSpan waitTime = TimeSpan.FromSeconds(GlobalConfiguration.Current.Configuration.StorageSyncInterval);
-            while (server.Status == ServerStatus.Running)
+            using (var distLock = new DistributedLock("SyncJobs", false))
             {
-                using (var distLock = new DistributedLock("SyncJobs", false))
+                if (distLock.TryEnter())
                 {
-                    if (distLock.TryEnter())
+                    List<BackgroundJob> bgJobs = new List<BackgroundJob>();
+                    LoadLogs(bgJobs, GlobalConfiguration.Current.Storage.GetBackgroundJobs(JobStatus.Processed, null, 0, -1));
+                    LoadLogs(bgJobs, GlobalConfiguration.Current.Storage.GetBackgroundJobs(JobStatus.Failed, null, 0, -1));
+                    int batchSize = GlobalConfiguration.Current.Configuration.StorageSyncBatchSize;
+                    if (bgJobs.Count > batchSize)
                     {
-                        List<BackgroundJob> bgJobs = new List<BackgroundJob>();
-                        LoadLogs(bgJobs, GlobalConfiguration.Current.Storage.GetBackgroundJobs(JobStatus.Processed, null, 0, -1));
-                        LoadLogs(bgJobs, GlobalConfiguration.Current.Storage.GetBackgroundJobs(JobStatus.Failed, null, 0, -1));
-                        int batchSize = GlobalConfiguration.Current.Configuration.StorageSyncBatchSize;
-                        if (bgJobs.Count > batchSize)
+                        for (int i = 0; i < Math.Ceiling(bgJobs.Count / (double)batchSize); i++)
                         {
-                            for (int i = 0; i < Math.Ceiling(bgJobs.Count / (double)batchSize); i++)
-                            {
-                                int startIndex = i * batchSize;
-                                MoveJobs(bgJobs.GetRange(startIndex, Math.Min(batchSize, bgJobs.Count - startIndex)));
-                                if (server.Status != ServerStatus.Running)
-                                    break;
-                            }
+                            int startIndex = i * batchSize;
+                            MoveJobs(bgJobs.GetRange(startIndex, Math.Min(batchSize, bgJobs.Count - startIndex)));
+                            if (server.Status != ServerStatus.Running)
+                                break;
                         }
-                        else if (bgJobs.Count > 0)
-                            MoveJobs(bgJobs);
                     }
+                    else if (bgJobs.Count > 0)
+                        MoveJobs(bgJobs);
                 }
-                Task.Delay(waitTime).Wait();
             }
-            cts.Cancel();
         }
 
         private void MoveJobs(List<BackgroundJob> bgJobs)
@@ -79,43 +94,27 @@ namespace EnqueueIt.Internal
 
         private void CleanStorage()
         {
-            TimeSpan waitTime = TimeSpan.FromSeconds(GlobalConfiguration.Current.Configuration.CleanStorageInterval);
-            while (server.Status == ServerStatus.Running)
+            using (var distLock = new DistributedLock("CleanStorage", false))
             {
-                using (var distLock = new DistributedLock("CleanStorage", false))
+                if (distLock.TryEnter())
                 {
-                    if (distLock.TryEnter())
-                    {
-                        DeleteInactiveLocks();
-                        StopInactiveJobs();
-                    }
+                    DeleteInactiveLocks();
+                    StopInactiveJobs();
                 }
-                try
-                {
-                    Task.Delay(waitTime, cts.Token).Wait();
-                } catch { }
             }
-        }
+       }
 
         private void DeleteExpiredJobs()
         {
-            TimeSpan waitTime = TimeSpan.FromHours(1);
-            while (server.Status == ServerStatus.Running)
+            using (var distLock = new DistributedLock("DeleteExpiredJobs", false))
             {
-                using (var distLock = new DistributedLock("DeleteExpiredJobs", false))
+                if (distLock.TryEnter())
                 {
-                    if (distLock.TryEnter())
-                    {
-                        if (GlobalConfiguration.Current.LongTermStorage != null)
-                            GlobalConfiguration.Current.LongTermStorage.DeleteExpired();
-                        else
-                            GlobalConfiguration.Current.Storage.DeleteExpired();
-                    }
+                    if (GlobalConfiguration.Current.LongTermStorage != null)
+                        GlobalConfiguration.Current.LongTermStorage.DeleteExpired();
+                    else
+                        GlobalConfiguration.Current.Storage.DeleteExpired();
                 }
-                try
-                {
-                    Task.Delay(waitTime, cts.Token).Wait();
-                } catch { }
             }
         }
 

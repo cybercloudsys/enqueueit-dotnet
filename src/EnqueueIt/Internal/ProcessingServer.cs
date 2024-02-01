@@ -31,6 +31,7 @@ namespace EnqueueIt.Internal
     {
         Server server;
         Workers workers = new Workers();
+        StorageHandler storageHandler;
 
         internal ProcessingServer(Server server)
         {
@@ -69,7 +70,7 @@ namespace EnqueueIt.Internal
                             BaseDirectory = AppDomain.CurrentDomain.BaseDirectory,
                             LauncherApp = "dotnet" });
                     }
-                    new StorageHandler(server);
+                    storageHandler = new StorageHandler(server);
                     server.Queues.ForEach(queue => {
                         new Thread(() => DequeueJobs(queue)).Start();
                         new Thread(() => EnqueueScheduled(queue)).Start();
@@ -100,6 +101,8 @@ namespace EnqueueIt.Internal
                 Servers.Stop(server.Id);
                 server.Status = ServerStatus.Stopped;
                 GlobalConfiguration.Current.Storage.SyncServer(server);
+                if (storageHandler != null)
+                    storageHandler.ForceStop();
             }
         }
 
@@ -180,18 +183,9 @@ namespace EnqueueIt.Internal
                     current = current.AddMilliseconds(-current.Millisecond-1).AddSeconds(1);
                     foreach (var job in jobs)
                     {
-                        // try
-                        // {
                         if ((job.StartAt.HasValue && job.StartAt.Value.AddMilliseconds(-job.StartAt.Value.Millisecond-1) <= current && job.Active)
                             || (job.IsRecurring && job.RecurringPattern.IsMatching(current)))
                             BackgroundJobs.EnqueueById(job.Id);
-                        // }
-                        // catch (Exception ex)
-                        // {
-                        //     Console.WriteLine("-------------------------------------------");
-                        //     Console.WriteLine(ex);
-                        //     Console.WriteLine("*******************************************");
-                        // }
                     }
                     lastCheck = current;
                 }

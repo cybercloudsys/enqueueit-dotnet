@@ -76,7 +76,7 @@
                                             <script>
                                                 document.write(`<span class="dateTime" data-toggle="tooltip" data-placement="top"
                                                     data-time='@job.CreatedAt.ToString("yyyy-MM-dd HH:mm:ss")'
-                                                    title="${moment.utc('@job.CreatedAt').format('ddd DD-MMM-YYYY, HH:mm:ss')}">
+                                                    title="${moment.utc('@job.CreatedAt.ToString("yyyy-MM-dd HH:mm:ss")').format('ddd DD-MMM-YYYY, HH:mm:ss')}">
                                                     ${moment.utc('@job.CreatedAt.ToString("yyyy-MM-dd HH:mm:ss")').fromNow()}
                                                 </span>`);
                                             </script>
@@ -86,7 +86,7 @@
                                             <script>
                                                 document.write(`<span class="dateTime" data-toggle="tooltip" data-placement="top"
                                                     data-time='@job.StartedAt.Value.ToString("yyyy-MM-dd HH:mm:ss")'
-                                                    title="${moment.utc('@job.StartedAt').format('ddd DD-MMM-YYYY, HH:mm:ss')}">
+                                                    title="${moment.utc('@job.StartedAt.Value.ToString("yyyy-MM-dd HH:mm:ss")').format('ddd DD-MMM-YYYY, HH:mm:ss')}">
                                                     ${moment.utc('@job.StartedAt.Value.ToString("yyyy-MM-dd HH:mm:ss")').fromNow()}
                                                 </span>`);
                                             </script>
@@ -104,7 +104,7 @@
                                     <script>
                                         document.write(`<span class="dateTime" data-toggle="tooltip" data-placement="top"
                                             data-time='@job.StartAt.Value.ToString("yyyy-MM-dd HH:mm:ss")'
-                                            title="${moment.utc('@job.StartAt').format('ddd DD-MMM-YYYY, HH:mm:ss')}">
+                                            title="${moment.utc('@job.StartAt.Value.ToString("yyyy-MM-dd HH:mm:ss")').format('ddd DD-MMM-YYYY, HH:mm:ss')}">
                                             ${moment.utc('@job.StartAt.Value.ToString("yyyy-MM-dd HH:mm:ss")').fromNow()}
                                         </span>`);
                                     </script>
@@ -117,7 +117,7 @@
                                 <script>
                                     document.write(`<span class="dateTime" data-toggle="tooltip" data-placement="top"
                                         data-time='@job.StartAt.Value.ToString("yyyy-MM-dd HH:mm:ss")'
-                                        title="${moment.utc('@job.StartAt').format('ddd DD-MMM-YYYY, HH:mm:ss')}">
+                                        title="${moment.utc('@job.StartAt.Value.ToString("yyyy-MM-dd HH:mm:ss")').format('ddd DD-MMM-YYYY, HH:mm:ss')}">
                                         ${moment.utc('@job.StartAt.Value.ToString("yyyy-MM-dd HH:mm:ss")').fromNow()}
                                     </span>`);
                                 </script>

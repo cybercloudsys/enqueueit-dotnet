@@ -4,7 +4,7 @@
     <Title>EnqueueIt.Dashboard</Title>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <OutputType>Library</OutputType>
-    <Version>0.3.0</Version>
+    <Version>0.3.1</Version>
     <Authors>Ahmed Abudaqqa</Authors>
     <Product>EnqueueIt.Dashboard</Product>
     <Company>Cyber Cloud Systems LLC</Company>
@@ -29,6 +29,6 @@
     <None Include="wwwroot/images/logo.png" Pack="true" PackagePath=""/>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="EnqueueIt" Version="0.3.0" />
+    <PackageReference Include="EnqueueIt" Version="0.3.1" />
   </ItemGroup>
 </Project>

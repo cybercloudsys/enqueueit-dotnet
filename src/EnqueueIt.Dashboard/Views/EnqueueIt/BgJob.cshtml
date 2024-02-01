@@ -120,7 +120,7 @@ else
             <script>
                 document.write(`<span class="dateTime" data-toggle="tooltip" data-placement="top"
                     data-time='@Model.CreatedAt.ToString("yyyy-MM-dd HH:mm:ss")'
-                    title="${moment.utc('@Model.CreatedAt').format('ddd DD-MMM-YYYY, HH:mm:ss')}">
+                    title="${moment.utc('@Model.CreatedAt.ToString("yyyy-MM-dd HH:mm:ss")').format('ddd DD-MMM-YYYY, HH:mm:ss')}">
                     ${moment.utc('@Model.CreatedAt.ToString("yyyy-MM-dd HH:mm:ss")').fromNow()}
                 </span>`);
             </script>
@@ -134,7 +134,7 @@ else
                 <script>
                     document.write(`<span class="dateTime" data-toggle="tooltip" data-placement="top"
                         data-time='@Model.StartedAt.Value.ToString("yyyy-MM-dd HH:mm:ss")'
-                        title="${moment.utc('@Model.StartedAt').format('ddd DD-MMM-YYYY, HH:mm:ss')}">
+                        title="${moment.utc('@Model.StartedAt.Value.ToString("yyyy-MM-dd HH:mm:ss")').format('ddd DD-MMM-YYYY, HH:mm:ss')}">
                         ${moment.utc('@Model.StartedAt.Value.ToString("yyyy-MM-dd HH:mm:ss")').fromNow()}
                     </span>`);
                 </script>
@@ -149,7 +149,7 @@ else
                 <script>
                     document.write(`<span class="dateTime" data-toggle="tooltip" data-placement="top"
                         data-time='@Model.CompletedAt.Value.ToString("yyyy-MM-dd HH:mm:ss")'
-                        title="${moment.utc('@Model.CompletedAt').format('ddd DD-MMM-YYYY, HH:mm:ss')}">
+                        title="${moment.utc('@Model.CompletedAt.Value.ToString("yyyy-MM-dd HH:mm:ss")').format('ddd DD-MMM-YYYY, HH:mm:ss')}">
                         ${moment.utc('@Model.CompletedAt.Value.ToString("yyyy-MM-dd HH:mm:ss")').fromNow()}
                     </span>`);
                 </script>
