@@ -400,6 +400,7 @@ namespace EnqueueIt.Redis
         {
             var job = GetJob(jobId);
             string strJobId = jobId.ToString();
+            db.KeyDelete($"RecurringJob:{job.Name}");
             db.ListRemove("Scheduled", strJobId);
             db.ListRemove("Recurring", strJobId);
             db.ListRemove($"QueueSchedule:{job.Queue}", strJobId);

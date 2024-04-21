@@ -1,4 +1,6 @@
 # Enqueue It
+[![Official Site](https://img.shields.io/badge/site-enqueueit.com-blue.svg)](https://www.enqueueit.com) [![Latest version](https://img.shields.io/badge/dynamic/xml?url=https%3A%2F%2Fgithub.com%2Fcybercloudsys%2Fenqueueit-dotnet%2Fraw%2Fmaster%2Fsrc%2FEnqueueIt%2FEnqueueIt.csproj&query=%2F%2FProject%2FPropertyGroup%2FVersion&prefix=v&label=release)](https://www.nuget.org/packages?q=enqueueit) [![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0) [![Build status](https://ci.appveyor.com/api/projects/status/9twyimm5686cvlfh/branch/master?svg=true)](https://ci.appveyor.com/project/abudaqqa/enqueueit/branch/master)
+
 Easy and scalable solution for manage and execute background tasks seamlessly in .NET applications. It allows you to schedule, queue, and process your jobs and microservices efficiently.
 
 Designed to support distributed systems, enabling you to scale your background processes across multiple servers. With advanced features like performance monitoring, exception logging, and integration with various storage types, you have complete control and visibility over your workflow.

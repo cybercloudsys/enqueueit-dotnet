@@ -44,8 +44,7 @@ namespace EnqueueIt.Internal
             }
             AppDomain.CurrentDomain.ProcessExit += delegate (object sender, EventArgs e) {
                 GlobalConfiguration.Current.Storage.SyncServer(server);
-                if (server != null && server.Status == ServerStatus.Running)
-                    Stop();
+                Stop();
             };
         }
 
@@ -90,19 +89,19 @@ namespace EnqueueIt.Internal
                         } catch { }
                         Task.Delay(waitTime).Wait();
                     }
+                    if (storageHandler != null)
+                        storageHandler.ForceStop();
                 }
             }).Start();
         }
 
         internal void Stop()
         {
-            if (server != null)
+            if (server != null && server.Status != ServerStatus.Stopped)
             {
                 Servers.Stop(server.Id);
                 server.Status = ServerStatus.Stopped;
                 GlobalConfiguration.Current.Storage.SyncServer(server);
-                if (storageHandler != null)
-                    storageHandler.ForceStop();
             }
         }
 

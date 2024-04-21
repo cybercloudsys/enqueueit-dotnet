@@ -4,7 +4,7 @@
     <Title>EnqueueIt</Title>
     <TargetFramework>netstandard2.0</TargetFramework>
     <OutputType>Library</OutputType>
-    <Version>0.3.1</Version>
+    <Version>0.3.2</Version>
     <Authors>Ahmed Abudaqqa</Authors>
     <Product>EnqueueIt</Product>
     <Company>Cyber Cloud Systems LLC</Company>

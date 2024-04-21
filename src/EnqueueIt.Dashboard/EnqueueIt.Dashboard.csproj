@@ -4,7 +4,7 @@
     <Title>EnqueueIt.Dashboard</Title>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <OutputType>Library</OutputType>
-    <Version>0.3.1</Version>
+    <Version>0.3.2</Version>
     <Authors>Ahmed Abudaqqa</Authors>
     <Product>EnqueueIt.Dashboard</Product>
     <Company>Cyber Cloud Systems LLC</Company>
@@ -24,11 +24,14 @@
     <DeterministicSourcePaths>true</DeterministicSourcePaths>
     <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
     <EnablePackageValidation>true</EnablePackageValidation>
+    <RestoreAdditionalProjectSources>
+      https://nuget.cybercloudsys.com/v3/index.json
+    </RestoreAdditionalProjectSources>
   </PropertyGroup>
   <ItemGroup>
     <None Include="wwwroot/images/logo.png" Pack="true" PackagePath=""/>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="EnqueueIt" Version="0.3.1" />
+    <PackageReference Include="EnqueueIt" Version="0.3.2" />
   </ItemGroup>
 </Project>

@@ -4,7 +4,7 @@
     <Title>EnqueueIt.Oracle</Title>
     <TargetFramework>netstandard2.1</TargetFramework>
     <OutputType>Library</OutputType>
-    <Version>0.3.1</Version>
+    <Version>0.3.2</Version>
     <Authors>Ahmed Abudaqqa</Authors>
     <Product>EnqueueIt.Oracle</Product>
     <Company>Cyber Cloud Systems LLC</Company>
@@ -24,9 +24,12 @@
     <DeterministicSourcePaths>true</DeterministicSourcePaths>
     <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
     <EnablePackageValidation>true</EnablePackageValidation>
+    <RestoreAdditionalProjectSources>
+      https://nuget.cybercloudsys.com/v3/index.json
+    </RestoreAdditionalProjectSources>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="EnqueueIt.Sql" Version="0.3.1" />
+    <PackageReference Include="EnqueueIt.Sql" Version="0.3.2" />
     <PackageReference Include="Oracle.EntityFrameworkCore" Version="5.21.90" />
   </ItemGroup>
   <ItemGroup>

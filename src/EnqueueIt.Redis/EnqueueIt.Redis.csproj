@@ -4,7 +4,7 @@
     <Title>EnqueueIt.Redis</Title>
     <TargetFramework>netstandard2.0</TargetFramework>
     <OutputType>Library</OutputType>
-    <Version>0.3.1</Version>
+    <Version>0.3.2</Version>
     <Authors>Ahmed Abudaqqa</Authors>
     <Product>EnqueueIt.Redis</Product>
     <Company>Cyber Cloud Systems LLC</Company>
@@ -23,9 +23,12 @@
     <DeterministicSourcePaths>true</DeterministicSourcePaths>
     <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
     <EnablePackageValidation>true</EnablePackageValidation>
+    <RestoreAdditionalProjectSources>
+      https://nuget.cybercloudsys.com/v3/index.json
+    </RestoreAdditionalProjectSources>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="EnqueueIt" Version="0.3.1" />
+    <PackageReference Include="EnqueueIt" Version="0.3.2" />
     <PackageReference Include="StackExchange.Redis" Version="2.6.80" />
   </ItemGroup>
   <ItemGroup>
